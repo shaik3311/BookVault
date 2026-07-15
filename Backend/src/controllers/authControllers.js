@@ -28,7 +28,31 @@ const register = async(req,res)=>{
     }
 }
 const login = async(req,res)=>{
+    const {email,password} = req.body;
 
+    if(!email || !password){
+        return res.status(400).send({
+            message : "Provide all the credentials"
+        })
+    }
+
+    try{
+        const user = await userModel.findOne({email});
+        const isMatch = await bcrypt.compare(password,user.password);
+        if(!isMatch){
+            return res.status(401).send({
+                message:"Invalid Credentials"
+            })
+        }
+        res.status(200).send({
+            message:`User with username : ${user.username} logged in successfully`
+        })
+    }catch(error){
+        res.status(500).send({
+            "message":"Internal server error",
+            "error":error
+        })
+    }
 }
 
 module.exports = {
