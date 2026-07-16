@@ -28,6 +28,8 @@ const register = async(req,res)=>{
         })
     }
 }
+
+
 const login = async(req,res)=>{
     const {email,password} = req.body;
 
@@ -39,6 +41,11 @@ const login = async(req,res)=>{
 
     try{
         const user = await userModel.findOne({email});
+        if(!user){
+            return res.status(404).send({
+                message:"User not found"
+            })
+        }
         const isMatch = await bcrypt.compare(password,user.password);
         if(!isMatch){
             return res.status(401).send({
@@ -46,18 +53,25 @@ const login = async(req,res)=>{
             })
         }
         const access_Token = await jwt.sign({
-            id:user._id
+            "id":user._id,
+            "role":"user"
         },process.env.JWT_SECRET_KEY,{
             expiresIn : "15m"
         });
         const refresh_Token = await jwt.sign({
-            id:user._id
+            "id":user._id
         },process.env.JWT_SECRET_KEY,{
             expiresIn : "7d"
         })
+        res.cookie("refreshToken", refresh_Token, {
+            httpOnly: true,
+            secure: true,        // true in production with HTTPS
+            sameSite: "Strict",
+            maxAge: 7 * 24 * 60 * 60 * 1000
+        });
         res.status(200).send({
             message:`User with username : ${user.username} logged in successfully`,
-            "token":token
+            "AccessToken":access_Token
         })
     }catch(error){
         res.status(500).send({
@@ -67,8 +81,66 @@ const login = async(req,res)=>{
     }
 }
 
+const refresh = async(req,res)=>{
+    const refreshToken = req.cookies.refreshToken;
+    if(!refreshToken){
+        res.status(401).send({
+            message:"Refresh Token not found at refresh route"
+        })
+    }
+
+    const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET_KEY);
+    const user = await userModel.findById(decoded.id);
+    const access_Token = await jwt.sign({
+        "id":user._id,
+        "role":"user"
+    },process.env.JWT_SECRET_KEY,{
+        expiresIn : "15m"
+    });
+    const refresh_Token = await jwt.sign({
+        "id":user._id
+    },process.env.JWT_SECRET_KEY,{
+        expiresIn : "7d"
+    });
+
+    res.cookie("refreshToken",refresh_Token,{
+        httpOnly:true,
+        secure:true,
+        sameSite:"Strict",
+        maxAge:7*24*60*60*1000
+    });
+    res.status(200).send({
+        message:"new access_Token generated",
+        "access_Token" : access_Token
+    }); 
+
+}
+
+const getInfo = async(req,res)=>{
+    const header = req.headers;
+    if(!header){
+        return res.status(401).send({
+            message:"Authorization header not found"
+        });
+    }
+    const accessToken = header.authorization.split(" ")[1];
+    if(!accessToken){
+        return res.status(401).send({
+            message:"AccessToken not found"
+        })
+    }
+    const decoded = await jwt.verify(accessToken,process.env.JWT_SECRET_KEY);
+    const user = await userModel.findById(decoded.id);
+    res.status(200).send({
+        message:"User fetched successfully",
+        "user":user
+    })
+}
+
 module.exports = {
     register,
-    login
+    login,
+    refresh,
+    getInfo
 }
 
