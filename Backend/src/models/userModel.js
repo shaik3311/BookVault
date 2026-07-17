@@ -14,6 +14,14 @@ const userSchema = mongoose.Schema({
     "password":{
         type:String,
         required:true
+    },
+    "role":{
+        type:String,
+        enum:["user","admin"],
+        default : "user"
+    },
+    Bookmarks : {
+        type : mongoose.Schema.Types.ObjectId,
     }
 });
 
