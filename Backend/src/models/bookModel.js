@@ -18,7 +18,14 @@ const bookSchema = mongoose.Schema({
         type:String,
         required:true
     },
+    "bookFileId":{
+        type:String
+    },
     "coverUrl":{
+        type:String,
+        required:true
+    },
+    "coverFileId":{
         type:String,
         required:true
     }

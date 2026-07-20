@@ -5,7 +5,9 @@ const verifyAdmin = require('../middleWares/verifyAdmin');
 const bookRouter = express.Router();
 const upload = require('../config/multerConfig');
 
+// Public Routes 
 bookRouter.get('/books',getBooks);
+// Admin Routes 
 bookRouter.post('/books',
                 verifyToken,verifyAdmin,
                 upload.fields([
@@ -13,11 +15,11 @@ bookRouter.post('/books',
                     { name: "cover", maxCount: 1 },
                 ]),
                 postBook);
-bookRouter.patch('/books',verifyToken,verifyAdmin,editBook);
 bookRouter.delete('/books',verifyToken,verifyAdmin,removeBook);
 
-bookRouter.get('/bookmarks',getBookMarks);
-bookRouter.post('/bookmarks',addBookMark);
-bookRouter.delete('/bookmarks',removeBookMark);
+// User Routes 
+bookRouter.get('/bookmarks',verifyToken,getBookMarks);
+bookRouter.post('/bookmarks',verifyToken,addBookMark);
+bookRouter.delete('/bookmarks',verifyToken,removeBookMark);
 
 module.exports = bookRouter;
