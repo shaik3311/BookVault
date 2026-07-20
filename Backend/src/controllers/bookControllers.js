@@ -2,6 +2,9 @@ const imageKit = require('../config/imageKitConfig');
 const bookModel = require('../models/bookModel');
 // Books Routes 
 const getBooks = async(req,res)=>{
+    res.status(200).send({
+        message:"Hello you successfully logged in...."
+    })
     
 }
 const postBook = async(req,res)=>{
@@ -46,7 +49,9 @@ const postBook = async(req,res)=>{
 }
 
 const editBook = async(req,res)=>{
-
+    res.status(200).send({
+        message:"Hello you successfully logged in...."
+    })
 }
 const removeBook = async(req,res)=>{
 
