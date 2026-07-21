@@ -1,5 +1,6 @@
 const imageKit = require('../config/imageKitConfig');
 const bookModel = require('../models/bookModel');
+const userModel = require('../models/userModel')
 
 // Public Books Routes 
 const getBooks = async(req,res)=>{
@@ -96,13 +97,98 @@ const removeBook = async(req,res)=>{
 
 // BookMark Routes 
 const addBookMark = async(req,res)=>{
+    const{userId,bookId} = req.body;
 
+    if(!userId||!bookId){
+        return res.status(402).send({
+            message:"UserId and bookId is mandatory to give for adding bookmark"
+        })
+    }
+
+    try{
+        const updatedUser = await userModel.findByIdAndUpdate(
+            userId,
+            {
+                $push:{
+                    Bookmarks: bookId
+                }
+            },
+            {
+                new:true
+            }
+        );
+        if(!updatedUser){
+            return res.status(404).send({
+                message:"User not found"
+            })
+        }
+        res.status(201).send({
+            message:`Boomark added in user : ${updatedUser.username}`
+        })
+    }catch(error){
+        return res.status(500).send({
+            message:"Error at adding a bookmark"
+        })
+    }
 }
+
 const getBookMarks = async(req,res)=>{
+    const userId = req.user.id;
 
+    if(!userId){
+        return res.status(402).send({
+            message:"UserId is required"
+        })
+    }
+
+    try{
+        const user = await userModel.findById(userId);
+        const books = await bookModel.find({
+            _id:{$in:user.Bookmarks}
+        });
+        return res.status(200).send({
+            message:"Bookmarked Book fetched!!",
+            Books:books
+        });
+    }catch(error){
+        return res.status(500).send({
+            message:"Internal server error in getBooks"
+        });
+    }
 }
-const removeBookMark = async(req,res)=>{
 
+const removeBookMark = async(req,res)=>{
+    const{userId,bookId} = req.body;
+
+    if(!userId||!bookId){
+        return res.status(402).send({
+            message:"UserId and bookId is required"
+        })
+    }
+
+    try {
+        const user = await userModel.findByIdAndUpdate(
+            userId,
+            {
+                $pull: {
+                    Bookmarks: bookId
+                }
+            },
+            {
+                new: true
+            }
+        );
+
+        return res.status(200).send({
+            message: "Bookmark removed successfully",
+            user
+        });
+
+    } catch (error) {
+        return res.status(500).send({
+            message: "Internal server error"
+        });
+    }
 }
 
 module.exports = {
