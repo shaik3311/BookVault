@@ -137,10 +137,27 @@ const getInfo = async(req,res)=>{
     })
 }
 
+const checkUsername = async(req,res)=>{
+    const {username} = req.params;
+
+    try{
+        const user = await userModel.findOne({username});
+        if(user){
+            return res.status(200).status({
+                message:"Username already exists",
+                availability : false
+            })
+        }
+    }catch(error){
+            
+    }
+}
+
 module.exports = {
     register,
     login,
     refresh,
-    getInfo
+    getInfo,
+    checkUsername
 }
 
