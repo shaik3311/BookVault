@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { BookOpen, ShieldCheck, Bookmark } from "lucide-react";
 import { useNavigate } from "react-router";
 import axios from "axios";
@@ -9,8 +9,53 @@ const Register = () => {
     const [username, setUsername] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [usernameAvailabilityMessage,setUsernameAvailabilityMessage] = useState("");
+    const [emailAvailabilityMessage,setEmailAvailabilityMessage] = useState("");
 
     const navigate = useNavigate();
+
+    // check username available 
+    useEffect(() => {
+      if(!username) return;
+
+      const timer = setTimeout(async () => {
+        try {
+            const res = await axios.get(
+                `http://localhost:3000/api/auth/check-username/${username}`
+            );
+
+            setUsernameAvailabilityMessage(res.data.message);
+        } catch (err) {
+            setUsernameAvailabilityMessage("Something went wrong");
+        }
+      }, 500);
+    
+      return () => {
+        clearTimeout(timer);
+      }
+    }, [username]);
+
+    // email availability check 
+    useEffect(() => {
+      if(!email) return;
+
+      const timer = setTimeout(async () => {
+        try {
+            const res = await axios.get(
+                `http://localhost:3000/api/auth/check-email/${email}`
+            );
+
+            setEmailAvailabilityMessage(res.data.message);
+        } catch (err) {
+            setEmailAvailabilityMessage("Something went wrong");
+        }
+      }, 1000);
+    
+      return () => {
+        clearTimeout(timer);
+      }
+    }, [email]);
+    
 
     const handleRegister = async (e) => {
         e.preventDefault();
@@ -85,7 +130,7 @@ const Register = () => {
               Start your reading journey today.
             </p>
 
-            <form className="space-y-5">
+            <form className="space-y-5 ease-in duration-1s">
               <input
                 type="text"
                 placeholder="User Name"
@@ -93,8 +138,22 @@ const Register = () => {
                 onChange={(e)=>{
                     setUsername(e.target.value)
                 }}
-                className="w-full border rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-indigo-500"
+                onFocus={()=>{
+                  setEmailAvailabilityMessage("");
+                }}
+                className="w-full border rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-300"
               />
+              {usernameAvailabilityMessage && (
+                <div
+                  className={`mt-2 flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-300 ${
+                    usernameAvailabilityMessage === "Username is available"
+                      ? "bg-green-50 text-green-700 border border-green-200"
+                      : "bg-red-50 text-red-700 border border-red-200"
+                  }`}
+                >
+                  <span>{usernameAvailabilityMessage}</span>
+                </div>
+              )}
 
               <input
                 type="email"
@@ -103,8 +162,23 @@ const Register = () => {
                 onChange={(e)=>{
                     setEmail(e.target.value)
                 }}
+                onFocus={()=>{
+                  setUsernameAvailabilityMessage("");
+                  setEmailAvailabilityMessage("");
+                }}
                 className="w-full border rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-indigo-500"
               />
+              {emailAvailabilityMessage && (
+                <div
+                  className={`mt-2 flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-300 ${
+                    emailAvailabilityMessage === "Email is available"
+                      ? "bg-green-50 text-green-700 border border-green-200"
+                      : "bg-red-50 text-red-700 border border-red-200"
+                  }`}
+                >
+                  <span>{emailAvailabilityMessage}</span>
+                </div>
+              )}
 
               <input
                 type="password"
@@ -112,6 +186,10 @@ const Register = () => {
                 value={password}
                 onChange={(e)=>{
                     setPassword(e.target.value)
+                }}
+                onFocus={()=>{
+                  setUsernameAvailabilityMessage("");
+                  setEmailAvailabilityMessage("");
                 }}
                 className="w-full border rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-indigo-500"
               />
