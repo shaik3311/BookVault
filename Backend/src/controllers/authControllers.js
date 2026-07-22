@@ -139,6 +139,11 @@ const getInfo = async(req,res)=>{
 
 const checkUsername = async(req,res)=>{
     const {username} = req.params;
+    if(username.length < 4){
+        return res.status(200).send({
+            message:"Username at least 4 chars"
+        })
+    }
 
     try{
         const user = await userModel.findOne({username});
@@ -161,6 +166,11 @@ const checkUsername = async(req,res)=>{
 }
 const checkEmail = async(req,res)=>{
     const {email} = req.params;
+    if(!email || !email.toLowerCase().endsWith("@gmail.com")){
+        return res.status(202).send({
+            message:"Enter a valid email"
+        })
+    }
 
     try{
         const user = await userModel.findOne({email});
@@ -188,6 +198,7 @@ module.exports = {
     login,
     refresh,
     getInfo,
-    checkUsername
+    checkUsername,
+    checkEmail
 }
 
