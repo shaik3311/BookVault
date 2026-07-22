@@ -143,13 +143,20 @@ const checkUsername = async(req,res)=>{
     try{
         const user = await userModel.findOne({username});
         if(user){
-            return res.status(200).status({
+            return res.status(200).send({
                 message:"Username already exists",
                 availability : false
             })
         }
+        return res.status(200).send({
+            message: "Username is available",
+            availability: true
+        });
     }catch(error){
-            
+        res.status(500).send({
+            message:"Internal server error",
+            error:error
+        })  
     }
 }
 
