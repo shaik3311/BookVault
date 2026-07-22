@@ -159,6 +159,29 @@ const checkUsername = async(req,res)=>{
         })  
     }
 }
+const checkEmail = async(req,res)=>{
+    const {email} = req.params;
+
+    try{
+        const user = await userModel.findOne({email});
+        if(user){
+            return res.status(200).send({
+                message:"Email already exists",
+                availability : false
+            })
+        }
+        return res.status(200).send({
+            message: "Email is available",
+            availability: true
+        });
+    }catch(error){
+        res.status(500).send({
+            message:"Internal server error",
+            error:error
+        })  
+    }
+}
+
 
 module.exports = {
     register,

@@ -8,5 +8,6 @@ authRouter.post('/login', login);
 authRouter.post('/refresh', refresh);
 authRouter.get('/getInfo', getInfo);
 authRouter.get('/check-username/:username',checkUsername);
+authRouter.get('/check-email/:email', checkEmail);
 
 module.exports = authRouter;
