@@ -1,11 +1,30 @@
-import React from "react";
+import React, { useState } from "react";
 import { BookOpen, ShieldCheck, Bookmark } from "lucide-react";
 import { useNavigate } from "react-router";
+import toast from "react-hot-toast";
+import axios from "axios";
 
 const Register = () => {
+    const [email, setEmail] = useState("");
+    const [password,setPassword] = useState("");
     const navigate = useNavigate();
-    const handleLogin = ()=>{
+
+    // Login Logic 
+    const handleLogin = async(e)=>{
+      e.preventDefault();
+
+      try{
+        const res = await axios.post("http://localhost:3000/api/auth/login",{
+          "email":email,
+          "password":password
+        });
+        toast.success(res.data.message);
+        const accessToken = res.data.AccessToken;
+        localStorage.setItem("accessToken",accessToken);
         navigate('/');
+      }catch(error){
+        toast.error(error.response.data.message);
+      }
     }
     const redirectRegister = ()=>{
         navigate('/register');
@@ -68,17 +87,25 @@ const Register = () => {
               <input
                 type="email"
                 placeholder="Email"
+                value={email}
+                onChange={(e)=>{
+                  setEmail(e.target.value)
+                }}
                 className="w-full border rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-indigo-500"
               />
 
               <input
                 type="password"
                 placeholder="Password"
+                value={password}
+                onChange={(e)=>{
+                  setPassword(e.target.value)
+                }}
                 className="w-full border rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-indigo-500"
               />
 
               <button
-                onClick={handleLogin}
+                onClick={(e)=>handleLogin(e)}
                 className="w-full bg-indigo-600 hover:bg-indigo-700 transition text-white rounded-xl py-3 font-semibold"
               >
                 Login Account

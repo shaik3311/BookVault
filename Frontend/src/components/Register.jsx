@@ -56,7 +56,7 @@ const Register = () => {
       }
     }, [email]);
     
-
+    // Register logic 
     const handleRegister = async (e) => {
         e.preventDefault();
 
@@ -77,6 +77,10 @@ const Register = () => {
             toast.error(error.response?.data?.message || "Registration failed");
         }
     };
+
+    const redirectLogin = ()=>{
+      navigate('/login');
+    }
   return (
     <div
       className="min-h-screen bg-cover bg-center bg-no-repeat flex items-center justify-center p-4"
@@ -204,7 +208,7 @@ const Register = () => {
 
             <p className="text-center mt-6 text-gray-500">
               Already have an account?
-              <span onClick={handleRegister} className="text-indigo-600 font-semibold cursor-pointer ml-1">
+              <span onClick={redirectLogin} className="text-indigo-600 font-semibold cursor-pointer ml-1">
                 Login
               </span>
             </p>
