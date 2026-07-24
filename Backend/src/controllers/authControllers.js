@@ -71,7 +71,7 @@ const login = async(req,res)=>{
         });
         res.status(200).send({
             message:`User with username : ${user.username} logged in successfully`,
-            "AccessToken":access_Token
+            "accessToken":access_Token
         })
     }catch(error){
         res.status(500).send({
