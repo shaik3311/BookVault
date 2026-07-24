@@ -9,15 +9,29 @@ import {
   Menu,
   X,
 } from "lucide-react";
-import { Navigate,NavLink, useNavigate } from "react-router-dom";
+import { Navigate,NavLink, useNavigate, useNavigation } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { logout } from "../redux/features/authSlice";
+import toast from "react-hot-toast";
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
   const [mobileMenu, setMobileMenu] = useState(false);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
-  // Replace these with Redux data later
-  const [loggedUser] = useState("Shaik3311");
-  const [role] = useState("Reader");
+  // Redux data later
+  const username = useSelector((state)=>state.auth.username);
+  const role = useSelector((state)=>state.auth.role);
+  
+
+  const handleLogout = ()=>{
+    // console.log("Logout handler running");
+    dispatch(logout());
+    localStorage.removeItem("accessToken");
+    toast.success("Successfully logged Out");
+    navigate('/login');
+  }
 
   return (
     <nav className="sticky top-0 z-50 bg-white shadow-md border-b border-gray-200 bg-indigo-300">
@@ -27,8 +41,7 @@ const Navbar = () => {
           <div className="bg-indigo-600 p-2 rounded-xl">
             <BookOpen className="text-white" size={22} />
           </div>
-
-          <h1 onClick={Navigate('/')} className="text-2xl font-bold text-gray-800">
+          <h1 onClick={()=>Navigate('/')} className="text-2xl font-bold text-gray-800">
             Book<span className="text-indigo-600">Vault</span>
           </h1>
         </div>
@@ -88,7 +101,7 @@ const Navbar = () => {
               </div>
 
               <div className="text-left">
-                <p className="font-semibold text-gray-800">{loggedUser}</p>
+                <p className="font-semibold text-gray-800">{username}</p>
                 <p className="text-xs text-gray-500">{role}</p>
               </div>
 
@@ -107,7 +120,7 @@ const Navbar = () => {
                   View Profile
                 </button>
 
-                <button className="w-full flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 transition">
+                <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 transition">
                   <LogOut size={18} />
                   Logout
                 </button>
@@ -186,7 +199,7 @@ const Navbar = () => {
               </div>
 
               <div>
-                <p className="font-semibold text-gray-800">{loggedUser}</p>
+                <p className="font-semibold text-gray-800">{username}</p>
                 <p className="text-sm text-gray-500">{role}</p>
               </div>
             </div>

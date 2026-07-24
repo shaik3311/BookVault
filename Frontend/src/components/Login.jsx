@@ -3,24 +3,22 @@ import { BookOpen, ShieldCheck, Bookmark } from "lucide-react";
 import { useNavigate } from "react-router";
 import toast from "react-hot-toast";
 import axios from "axios";
+import { useDispatch } from "react-redux";
+import { loginUser } from "../redux/features/authThunk";
 
 const Register = () => {
     const [email, setEmail] = useState("");
     const [password,setPassword] = useState("");
     const navigate = useNavigate();
+    const dispatch = useDispatch();
 
     // Login Logic 
     const handleLogin = async(e)=>{
       e.preventDefault();
 
       try{
-        const res = await axios.post("http://localhost:3000/api/auth/login",{
-          "email":email,
-          "password":password
-        });
-        toast.success(res.data.message);
-        const accessToken = res.data.AccessToken;
-        localStorage.setItem("accessToken",accessToken);
+        dispatch(loginUser({email,password}))
+        toast.success("Successfully logged In");
         navigate('/');
       }catch(error){
         toast.error(error.response.data.message);
