@@ -117,24 +117,45 @@ const refresh = async(req,res)=>{
 }
 
 const getInfo = async(req,res)=>{
-    const header = req.headers;
-    if(!header){
-        return res.status(401).send({
-            message:"Authorization header not found"
-        });
-    }
-    const accessToken = header.authorization.split(" ")[1];
-    if(!accessToken){
-        return res.status(401).send({
-            message:"AccessToken not found"
+    try{
+        const header = req.headers;
+        if(!header){
+            return res.status(401).send({
+                message:"Authorization header not found"
+            });
+        }
+        const accessToken = header.authorization.split(" ")[1];
+        if(!accessToken){
+            return res.status(401).send({
+                message:"AccessToken not found"
+            })
+        }
+        const decoded = await jwt.verify(accessToken,process.env.JWT_SECRET_KEY);
+        const user = await userModel.findById(decoded.id);
+        res.status(200).send({
+            message:"User fetched successfully",
+            "user":user
+        })
+    }catch(error){
+        // AccessToken Expired 
+        if (error.name === "TokenExpiredError") {
+            return res.status(401).json({
+                message: "AccessToken expired",
+            });
+        }
+
+        // Invalid token
+        if (error.name === "JsonWebTokenError") {
+            return res.status(401).json({
+                message: "Invalid access token",
+            });
+        }
+
+        return res.status(500).send({
+            message:"Internal server error",
+            error:error
         })
     }
-    const decoded = await jwt.verify(accessToken,process.env.JWT_SECRET_KEY);
-    const user = await userModel.findById(decoded.id);
-    res.status(200).send({
-        message:"User fetched successfully",
-        "user":user
-    })
 }
 
 const checkUsername = async(req,res)=>{
