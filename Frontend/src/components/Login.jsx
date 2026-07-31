@@ -20,7 +20,15 @@ const Register = () => {
         });
         toast.success(res.data.message);
         const accessToken = res.data.AccessToken;
+        const user = res.data.user
+        // console.log(user);
         localStorage.setItem("accessToken",accessToken);
+        localStorage.setItem("loggedUser",JSON.stringify({
+          "username":user.username,
+          "email":user.email,
+          "role":user.role,
+          "bookmarks":user.bookmarks
+        }));
         navigate('/');
       }catch(error){
         toast.error(error.response.data.message);

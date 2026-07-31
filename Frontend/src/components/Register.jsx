@@ -67,7 +67,7 @@ const Register = () => {
             password,
             });
 
-            toast.success("🎉 Registration successful! Please login to continue.");
+            toast.success("Registration successful! Please login to continue.");
 
             setTimeout(() => {
             navigate("/");
@@ -77,7 +77,6 @@ const Register = () => {
             toast.error(error.response?.data?.message || "Registration failed");
         }
     };
-
     const redirectLogin = ()=>{
       navigate('/login');
     }

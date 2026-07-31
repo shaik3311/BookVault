@@ -10,14 +10,25 @@ import {
   X,
 } from "lucide-react";
 import { Navigate,NavLink, useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
   const [mobileMenu, setMobileMenu] = useState(false);
+  const navigate = useNavigate();
 
-  // Replace these with Redux data later
-  const [loggedUser] = useState("Shaik3311");
-  const [role] = useState("Reader");
+  const user = {
+    username : "user",
+    role :"guest"
+  }
+  const loggedUser = JSON.parse(localStorage.getItem("loggedUser")) || user;
+
+  const handleLogout = ()=>{
+    localStorage.removeItem("loggedUser");
+    localStorage.removeItem("accessToken");
+    toast.success("Logged out");
+    navigate('/login')
+  }
 
   return (
     <nav className="sticky top-0 z-50 bg-white shadow-md border-b border-gray-200 bg-indigo-300">
@@ -88,8 +99,8 @@ const Navbar = () => {
               </div>
 
               <div className="text-left">
-                <p className="font-semibold text-gray-800">{loggedUser}</p>
-                <p className="text-xs text-gray-500">{role}</p>
+                <p className="font-semibold text-gray-800">{loggedUser.username}</p>
+                <p className="text-xs text-gray-500">{loggedUser.role}</p>
               </div>
 
               <ChevronDown
@@ -104,10 +115,10 @@ const Navbar = () => {
               <div className="absolute right-0 mt-3 w-56 bg-white rounded-xl shadow-xl border border-gray-200 overflow-hidden animate-fadeIn">
                 <button className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-100 transition">
                   <User size={18} />
-                  View Profile
+                  {loggedUser.username}
                 </button>
 
-                <button className="w-full flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 transition">
+                <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 transition">
                   <LogOut size={18} />
                   Logout
                 </button>
@@ -186,18 +197,18 @@ const Navbar = () => {
               </div>
 
               <div>
-                <p className="font-semibold text-gray-800">{loggedUser}</p>
-                <p className="text-sm text-gray-500">{role}</p>
+                <p className="font-semibold text-gray-800">{loggedUser.username}</p>
+                <p className="text-sm text-gray-500">{loggedUser.role}</p>
               </div>
             </div>
           </div>
 
           <button className="w-full flex items-center gap-3 px-6 py-4 hover:bg-gray-50 transition">
             <User size={20} />
-            View Profile
+            {loggedUser.username}
           </button>
 
-          <button className="w-full flex items-center gap-3 px-6 py-4 text-red-600 hover:bg-red-50 transition">
+          <button onClick={handleLogout} className="w-full flex items-center gap-3 px-6 py-4 text-red-600 hover:bg-red-50 transition">
             <LogOut size={20} />
             Logout
           </button>
