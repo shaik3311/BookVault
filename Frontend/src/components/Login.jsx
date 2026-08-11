@@ -3,6 +3,7 @@ import { BookOpen, ShieldCheck, Bookmark } from "lucide-react";
 import { useNavigate } from "react-router";
 import toast from "react-hot-toast";
 import axios from "axios";
+import axiosInstance from "../utility/axiosInstance";
 
 const Register = () => {
     const [email, setEmail] = useState("");
@@ -14,7 +15,7 @@ const Register = () => {
       e.preventDefault();
 
       try{
-        const res = await axios.post("http://localhost:3000/api/auth/login",{
+        const res = await axiosInstance.post("/auth/login",{
           "email":email,
           "password":password
         });

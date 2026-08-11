@@ -3,6 +3,7 @@ import { BookOpen, ShieldCheck, Bookmark } from "lucide-react";
 import { useNavigate } from "react-router";
 import axios from "axios";
 import toast from "react-hot-toast";
+import axiosInstance from "../utility/axiosInstance";
 
 
 const Register = () => {
@@ -20,8 +21,8 @@ const Register = () => {
 
       const timer = setTimeout(async () => {
         try {
-            const res = await axios.get(
-                `http://localhost:3000/api/auth/check-username/${username}`
+            const res = await axiosInstance.get(
+                `/auth/check-username/${username}`
             );
 
             setUsernameAvailabilityMessage(res.data.message);
@@ -41,8 +42,8 @@ const Register = () => {
 
       const timer = setTimeout(async () => {
         try {
-            const res = await axios.get(
-                `http://localhost:3000/api/auth/check-email/${email}`
+            const res = await axiosInstance.get(
+                `/auth/check-email/${email}`
             );
 
             setEmailAvailabilityMessage(res.data.message);
@@ -61,10 +62,10 @@ const Register = () => {
         e.preventDefault();
 
         try {
-            await axios.post("http://localhost:3000/api/auth/register", {
-            username,
-            email,
-            password,
+            await axiosInstance.post("/auth/register", {
+              username,
+              email,
+              password,
             });
 
             toast.success("Registration successful! Please login to continue.");
