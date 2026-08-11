@@ -71,8 +71,10 @@ const login = async(req,res)=>{
         });
         res.status(200).send({
             message:`User with username : ${user.username} logged in successfully`,
-            "AccessToken":access_Token
+            "AccessToken":access_Token,
+            "user":user
         })
+        
     }catch(error){
         res.status(500).send({
             "message":"Internal server error",
@@ -81,61 +83,136 @@ const login = async(req,res)=>{
     }
 }
 
-const refresh = async(req,res)=>{
-    const refreshToken = req.cookies.refreshToken;
-    if(!refreshToken){
-        res.status(401).send({
-            message:"Refresh Token not found at refresh route"
-        })
-    }
+const refresh = async (req, res) => {
+    try {
+        const refreshToken = req.cookies.refreshToken;
 
-    const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET_KEY);
-    const user = await userModel.findById(decoded.id);
-    const access_Token = await jwt.sign({
-        "id":user._id,
-        "role":"user"
-    },process.env.JWT_SECRET_KEY,{
-        expiresIn : "15m"
-    });
-    const refresh_Token = await jwt.sign({
-        "id":user._id
-    },process.env.JWT_SECRET_KEY,{
-        expiresIn : "7d"
-    });
+        if (!refreshToken) {
+            return res.status(401).send({
+                message: "Refresh token not found"
+            });
+        }
 
-    res.cookie("refreshToken",refresh_Token,{
-        httpOnly:true,
-        secure:true,
-        sameSite:"Strict",
-        maxAge:7*24*60*60*1000
-    });
-    res.status(200).send({
-        message:"new access_Token generated",
-        "access_Token" : access_Token
-    }); 
+        const decoded = jwt.verify(
+            refreshToken,
+            process.env.JWT_SECRET_KEY
+        );
 
-}
+        const user = await userModel.findById(decoded.id);
 
-const getInfo = async(req,res)=>{
-    const header = req.headers;
-    if(!header){
-        return res.status(401).send({
-            message:"Authorization header not found"
+        if (!user) {
+            return res.status(404).send({
+                message: "User not found"
+            });
+        }
+
+        const access_Token = jwt.sign(
+            {
+                id: user._id,
+                role: "user"
+            },
+            process.env.JWT_SECRET_KEY,
+            {
+                expiresIn: "15m"
+            }
+        );
+
+        const refresh_Token = jwt.sign(
+            {
+                id: user._id
+            },
+            process.env.JWT_SECRET_KEY,
+            {
+                expiresIn: "7d"
+            }
+        );
+
+        res.cookie("refreshToken", refresh_Token, {
+            httpOnly: true,
+            secure: true,
+            sameSite: "Strict",
+            maxAge: 7 * 24 * 60 * 60 * 1000
+        });
+
+        return res.status(200).send({
+            message: "New access token generated",
+            access_Token
+        });
+
+    } catch (error) {
+
+        if (error.name === "TokenExpiredError") {
+            return res.status(401).send({
+                message: "Refresh token has expired"
+            });
+        }
+
+        if (error.name === "JsonWebTokenError") {
+            return res.status(401).send({
+                message: "Invalid refresh token"
+            });
+        }
+
+        return res.status(500).send({
+            message: "Internal server error",
+            error: error.message
         });
     }
-    const accessToken = header.authorization.split(" ")[1];
-    if(!accessToken){
+};
+
+const getInfo = async (req, res) => {
+    const header = req.headers;
+
+    if (!header || !header.authorization) {
         return res.status(401).send({
-            message:"AccessToken not found"
-        })
+            message: "Authorization header not found"
+        });
     }
-    const decoded = await jwt.verify(accessToken,process.env.JWT_SECRET_KEY);
-    const user = await userModel.findById(decoded.id);
-    res.status(200).send({
-        message:"User fetched successfully",
-        "user":user
-    })
-}
+
+    try {
+        const accessToken = header.authorization.split(" ")[1];
+
+        if (!accessToken) {
+            return res.status(401).send({
+                message: "Access token not found"
+            });
+        }
+
+        const decoded = jwt.verify(accessToken, process.env.JWT_SECRET_KEY);
+
+        const user = await userModel.findById(decoded.id);
+
+        if (!user) {
+            return res.status(404).send({
+                message: "User not found"
+            });
+        }
+
+        return res.status(200).send({
+            message: "User fetched successfully",
+            user:user
+        });
+
+    } catch (error) {
+
+        if (error.name === "TokenExpiredError") {
+            return res.status(401).send({
+                message: "Access token has expired"
+            });
+        }
+
+        if (error.name === "JsonWebTokenError") {
+            return res.status(401).send({
+                message: "Invalid access token"
+            });
+        }
+
+        return res.status(500).send({
+            message: "Internal server error",
+            error: error.message
+        });
+    }
+};
 
 const checkUsername = async(req,res)=>{
     const {username} = req.params;
